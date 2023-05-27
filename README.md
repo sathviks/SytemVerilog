@@ -1,5 +1,7 @@
 # SytemVerilogFundamentals
-SytemVerilogFundamentals 100 code challenge 
+SytemVerilogFundamentals 100 code challenge Starting from 27-05-23
+
+
 WELCOME TO MY 100DAYSOFRTL  My Name is Sathvik S, I mostly use Xilinx Vivado Design Suite and sometimes Modelsim  and Eda playground software for the simulation of RTL Codes. And The Synthesis is performed by using Intel Quartus Prime Software.
 
 
