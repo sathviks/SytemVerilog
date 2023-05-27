@@ -9,5 +9,5 @@ experts and continune learning.
 
 
 Contacts:
-Linkdin:https://www.linkedin.com/in/sathvik-ss/
-Email:ssathvik1998@gamil.com
+::Linkdin:https://www.linkedin.com/in/sathvik-ss/
+::Email:ssathvik1998@gamil.com
