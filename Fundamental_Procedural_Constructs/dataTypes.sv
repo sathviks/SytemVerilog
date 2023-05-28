@@ -49,7 +49,7 @@ Hardware : 2 types
 1.reg :- procedural block 
 2.wire:- contiounes block 
 
-// donnot mix them if verilog 
+// donot mix them if verilog 
 
 new data type SV which act as both 1+2 in hardware is "logic" datatype-----> used in interface 
 
@@ -97,3 +97,4 @@ Note:If mixed both leads unstablestate
 3.1 Fixed poin real time
 
 4.bit 
+*/
