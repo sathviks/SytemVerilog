@@ -13,9 +13,12 @@ experts and continune learning.
 This repository contains sample snippets of code that illustrates SystemVerilog concepts
 
 The examples/svbasics directory has several examples that can be run to understand following concepts
- 1) data types - logic vs bit - operators
+ 1) data types - logic and bit - operators
  2) Arrays, Queues
  3) Class definition, objects, inheritance, virtual methods
+ 4) Interprocess communication(Events ,samphore ,mailbox)
+ 5) Randomization 
+ 6) Interfaces
 
 
 
