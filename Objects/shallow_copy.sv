@@ -57,7 +57,7 @@ endmodule
 
 
 /* output 
-	# KERNEL: Value of ds in t1 object: 45
+# KERNEL: Value of ds in t1 object: 45
 # KERNEL: Value of ds in t2 object: 45
 # KERNEL: Value of ds in s object: 100
 # KERNEL: Value of ds in t1 object: 78
