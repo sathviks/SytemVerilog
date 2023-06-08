@@ -20,7 +20,7 @@ The examples/svbasics directory has several examples that can be run to understa
  5) Randomization 
  6) Interfaces
 
-
+I have learned SystemVerilog from Kumar Khandagle (udemy)
 
 
 Contacts:
