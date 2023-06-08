@@ -2,12 +2,13 @@
 SytemVerilogFundamentals 100 code challenge Starting from May - 2023
 
 
-WELCOME TO MY 100DAYSOFRTL  My Name is Sathvik S, I mostly use Xilinx Vivado Design Suite and sometimes Modelsim  and Eda playground software for the simulation of RTL Codes. And The Synthesis is performed by using Intel Quartus Prime Software.
+WELCOME TO MY 100 DAYS OF SV  
+My Name is Sathvik S, I mostly use Xilinx Vivado Design Suite and sometimes Modelsim and Eda playground software for the simulation of RTL Codes. 
+And The Synthesis is performed by using Intel Quartus Prime Software.
 
 
-Passionate about VLSI design with practical expertise using Xilinx Vivado and other EDA tools. Looking
-for an opportunity in the semiconductor industry to work on innovative projects and collaborate with
-experts and continune learning.
+Passionate about Semiconductor design and verifation with practical expertise using Xilinx Vivado and other EDA tools. 
+Looking for an opportunity in the semiconductor industry to work on innovative projects and collaborate with experts and continune learning.
 
 
 This repository contains sample snippets of code that illustrates SystemVerilog concepts
@@ -26,3 +27,4 @@ I have learned SystemVerilog from Kumar Khandagle (udemy)
 Contacts:
 ::Linkdin:https://www.linkedin.com/in/sathvik-ss/
 ::Email:ssathvik1998@gamil.com
+::twitter:https://twitter.com/sathish_sathvik
