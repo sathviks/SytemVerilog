@@ -25,7 +25,48 @@ Transcation Class:
 
                 connecting event in DRV AND GEN together is referred as merging of events
 
+    Monitor Class:
+                1)capture DUT response
+                2)send response transaction to sco 
+                3)also control data to be send for specific operatrion(this is used in verification of complex bus protocal)
+                
+
+                Non blocking operator must be not used in monitor
+
+    Scoreboard:
+              1)Recive transaction from monitor
+              2)store transaction : array . queues, assso array
+              3)comparr with expected result 
+                -)algo in SCO
+                -)Expected data from other class
+                -)Expected data from other(DPI) lang
+
+    Environment Class:
+                    1)Hold all class together
+                    2)schedule different procesess
+                    3)connect mailbox,events
+
+
 */
+
+
+//////////////////////////////Interface
+
+
+
+interface fifo_if;
+  
+  logic clock, rd, wr;
+  logic full, empty;
+  logic [7:0] data_in;
+  logic [7:0] data_out;
+  logic rst;
+ 
+endinterface
+
+
+//////////////////////////////Testbench Code
+
 
 
 class transaction;
@@ -61,38 +102,99 @@ class transaction;
     copy.full = this.full;
     copy.empty = this.empty;
   endfunction
+  
 endclass
-
-class generator
-
-   mailbox #(transaction) mbx;
+ 
+/*
+ 
+module tb;
+  
+  transaction tr;
+  
+  initial begin
+    tr = new();
+    tr.display("TOP");    
+  end
+  
+  
+endmodule
+ 
+*/
+ 
+ 
+ 
+ 
+ 
+class generator;
   
    transaction tr;
-   int count =0;
-   event next;  // when to send next transcation
-
-   event done; // conveys completion of requested no. of tranction 
-
-    function new(mailbox #(transaction) mbx);
+   mailbox #(transaction) mbx;
+  
+   int count = 0;
+  
+   event next;  ///know when to send next transaction
+   event done;  ////conveys completion of requested no. of transaction
+   
+   
+  function new(mailbox #(transaction) mbx);
       this.mbx = mbx;
-      tr = new();
+      tr=new();
    endfunction; 
-
-
-   task run ();
-
-    repeat(count)
-    begin
-    assert(tr.randomize()) else $error("Randomization Failed");
-    mbx.put(tr.copy);
-    tr.display("GEN");
-    @(next);
-    end
-    ->done
+  
+ 
+   task run(); 
+    
+     repeat(count)	 
+	     begin    
+           assert(tr.randomize) else $error("Randomization failed");	
+           mbx.put(tr.copy);
+           tr.display("GEN");
+           @(next);
+         end 
+     
+     
+     ->done;
    endtask
-
+  
+  
 endclass
-
+ 
+/*
+  module tb;
+    
+    generator gen;
+    mailbox #(transaction) mbx;
+    
+    
+    
+    initial begin
+      mbx = new();
+      
+      gen = new(mbx);
+      
+      gen.count = 20;
+      gen.run();
+      
+      
+    end
+    
+ 
+ 
+ 
+ 
+ 
+    
+    
+    
+  endmodule
+  
+  */
+ 
+ 
+ 
+  
+  
+  
 class driver;
   
    virtual fifo_if fif;
@@ -105,7 +207,7 @@ class driver;
   
    
  
-   function new(mailbox #(transaction) mbx);
+    function new(mailbox #(transaction) mbx);
       this.mbx = mbx;
    endfunction; 
   
@@ -117,18 +219,20 @@ class driver;
     fif.data_in <= 0;
     repeat(5) @(posedge fif.clock);
     fif.rst <= 1'b0;
+    $display("[DRV] : DUT Reset Done");
   endtask
    
   //////Applying RANDOM STIMULUS TO DUT
   task run();
     forever begin
       mbx.get(datac);
+      
       datac.display("DRV");
       
       fif.rd <= datac.rd;
       fif.wr <= datac.wr;
       fif.data_in <= datac.data_in;
-      repeat(2) @(posedge fif.clock);// this delay depants on type of FIFO
+      repeat(2) @(posedge fif.clock);
       ->next;
     end
   endtask
@@ -137,7 +241,7 @@ class driver;
 endclass
  
  
- 
+/*
  
   module tb;
     
@@ -192,5 +296,290 @@ endclass
       $dumpvars;
     end
     
+    
+  endmodule
+  
+ */
+ 
+ 
+ 
+ 
+class monitor;
+ 
+   virtual fifo_if fif;
+  
+   mailbox #(transaction) mbx;
+  
+   transaction tr;
+ 
+  
+  
+ 
+  
+    function new(mailbox #(transaction) mbx);
+      this.mbx = mbx;     
+   endfunction;
+  
+  
+  task run();
+    tr = new();
+    
+    forever begin
+      repeat(2) @(posedge fif.clock);
+      tr.wr = fif.wr;
+      tr.rd = fif.rd;
+      tr.data_in = fif.data_in;
+      tr.data_out = fif.data_out;
+      tr.full = fif.full;
+      tr.empty = fif.empty;
+      
+      
+      mbx.put(tr);
+      
+      tr.display("MON");
+ 
+    end
+    
+  endtask
+  
+ 
+  
+endclass
+ 
+/////////////////////////////////////////////////////
+ 
+ 
+class scoreboard;
+  
+   mailbox #(transaction) mbx;
+  
+   transaction tr;
+  
+   event next;
+  
+  bit [7:0] din[$];
+  bit[7:0] temp;
+  
+   function new(mailbox #(transaction) mbx);
+      this.mbx = mbx;     
+    endfunction;
+  
+  
+  task run();
+    
+  forever begin
+    
+    mbx.get(tr);
+    
+    tr.display("SCO");
+    
+    if(tr.wr == 1'b1)
+      begin 
+      din.push_front(tr.data_in);
+        $display("[SCO] : DATA STORED IN QUEUE :%0d", tr.data_in);
+      end
+    
+    if(tr.rd == 1'b1)
+      begin
+        if(tr.empty == 1'b0) begin 
+          
+          temp = din.pop_back();
+          
+          if(tr.data_out == temp)
+            $display("[SCO] : DATA MATCH");
+           else
+             $error("[SCO] : DATA MISMATCH");
+        end
+        else 
+          begin
+            $display("[SCO] : FIFO IS EMPTY");
+          end
+        
+        
+     end
+    
+    ->next;
+  end
+  endtask
+ 
+  
+endclass
+//////////////////////////////////////
+ 
+ 
+/*
+module tb;
+  
+  
+  monitor mon;
+  scoreboard sco;
+  
+  mailbox #(transaction) mbx;
+  
+  event next;
+  
+  
+   fifo_if fif();
+  
+   fifo dut (fif.clock, fif.rd, fif.wr,fif.full, fif.empty, fif.data_in, fif.data_out, fif.rst);
+    
+    initial begin
+      fif.clock <= 0;
+    end
+    
+    always #10 fif.clock <= ~fif.clock;
+ 
+  
+  
+  initial begin
+    mbx = new();
+    
+    mon = new(mbx);
+    sco = new(mbx);
+    
+    mon.fif = fif; 
+    
+    mon.next = next;
+    sco.next = next;
+  end
+  
+  initial begin
+    fork
+      mon.run();
+      sco.run();
+    join
+  end
+  
+      initial begin
+      #200;
+      $finish();      
+    end
+    
+    initial begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+  
+  
+  
+  
+  
+endmodule
+ 
+*/
+ 
+ 
+ 
+ 
+class environment;
+ 
+    generator gen;
+    driver drv;
+  
+    monitor mon;
+    scoreboard sco;
+  
+  mailbox #(transaction) gdmbx; ///generator + Driver
+    
+  mailbox #(transaction) msmbx; ///Monitor + Scoreboard
+ 
+  event nextgs;
+ 
+ 
+  virtual fifo_if fif;
+  
+  
+  function new(virtual fifo_if fif);
+ 
+    
+    
+    gdmbx = new();
+    gen = new(gdmbx);
+    drv = new(gdmbx);
+    
+    
+    
+    
+    msmbx = new();
+    mon = new(msmbx);
+    sco = new(msmbx);
+    
+    
+    this.fif = fif;
+    
+    drv.fif = this.fif;
+    mon.fif = this.fif;
+    
+    
+    gen.next = nextgs;
+    sco.next = nextgs;
+ 
+  endfunction
+  
+  
+  
+  task pre_test();
+    drv.reset();
+  endtask
+  
+  task test();
+  fork
+    gen.run();
+    drv.run();
+    mon.run();
+    sco.run();
+  join_any
+    
+  endtask
+  
+  task post_test();
+    wait(gen.done.triggered);  
+    $finish();
+  endtask
+  
+  task run();
+    pre_test();
+    test();
+    post_test();
+  endtask
+  
+  
+  
+endclass
+ 
+ 
+ 
+ 
+ 
+ 
+  module tb;
+    
+   
+    
+    fifo_if fif();
+    fifo dut (fif.clock, fif.rd, fif.wr,fif.full, fif.empty, fif.data_in, fif.data_out, fif.rst);
+    
+    initial begin
+      fif.clock <= 0;
+    end
+    
+    always #10 fif.clock <= ~fif.clock;
+    
+    environment env;
+    
+    
+    
+    initial begin
+      env = new(fif);
+      env.gen.count = 20;
+      env.run();
+    end
+      
+    
+    initial begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+   
     
   endmodule
